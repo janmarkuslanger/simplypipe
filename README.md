@@ -219,6 +219,33 @@ class RunStats:
     duration: float   # wall-clock time in seconds
 ```
 
+## Development
+
+```bash
+git clone https://github.com/janmarkuslanger/simplypipe.git
+cd simplypipe
+pip install -e ".[dev]"
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+Lint and format:
+
+```bash
+ruff check .
+ruff format .
+```
+
+Type-check:
+
+```bash
+mypy simplypipe
+```
+
 ## License
 
 MIT

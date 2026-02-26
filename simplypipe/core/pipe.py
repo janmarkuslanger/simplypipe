@@ -24,12 +24,14 @@ class Pipe:
         def op(iterable: Iterable, _stats: RunStats):
             for item in iterable:
                 yield fn(item)
+
         return self._add_op(op)
 
     def flat_map(self, fn: Callable) -> Pipe:
         def op(iterable: Iterable, _stats: RunStats):
             for item in iterable:
                 yield from fn(item)
+
         return self._add_op(op)
 
     def filter(self, fn: Callable) -> Pipe:
@@ -39,6 +41,7 @@ class Pipe:
                     yield item
                 else:
                     stats.dropped += 1
+
         return self._add_op(op)
 
     def tap(self, fn: Callable) -> Pipe:
@@ -46,6 +49,7 @@ class Pipe:
             for item in iterable:
                 fn(item)
                 yield item
+
         return self._add_op(op)
 
     def batch(self, size: int) -> Pipe:
@@ -60,6 +64,7 @@ class Pipe:
             if buffer:
                 stats.batches += 1
                 yield buffer
+
         return self._add_op(op)
 
     def rate_limit(self, rate: float, per: float = 1.0) -> Pipe:
@@ -75,6 +80,7 @@ class Pipe:
                         time.sleep(min_interval - elapsed)
                 last_time = time.perf_counter()
                 yield item
+
         return self._add_op(op)
 
     def dedupe(self, key: Callable | None = None, max_size: int | None = None) -> Pipe:
@@ -92,6 +98,7 @@ class Pipe:
                     yield item
                 else:
                     stats.dropped += 1
+
         return self._add_op(op)
 
     def retry_map(
@@ -118,6 +125,7 @@ class Pipe:
                             time.sleep(backoff * (2**attempt))
                 else:
                     raise last_exc  # type: ignore[misc]
+
         return self._add_op(op)
 
     def take(self, n: int) -> Pipe:
