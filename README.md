@@ -2,19 +2,6 @@
 
 Chainable data pipelines for Python iterables. Zero dependencies.
 
-```python
-stats = (
-    pipe(records)
-    .filter(is_valid)
-    .map(normalize)
-    .catch(enrich_from_api, on_error=dead_letters.append)
-    .batch(100)
-    .run(sink=write_to_db)
-)
-```
-
-`.run()` returns a `RunStats` object with processed/emitted counts, error counts, and wall-clock duration.
-
 ```
 pip install simplypipe
 ```
