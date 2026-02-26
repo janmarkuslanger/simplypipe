@@ -1,6 +1,6 @@
 # simplypipe
 
-Process data from any iterable source — files, database rows, API results — through a chainable operator API: filter, transform, batch, deduplicate, retry on failure, and write to a sink. No external dependencies.
+Chainable data pipelines for Python iterables. Zero dependencies.
 
 ```python
 stats = (
