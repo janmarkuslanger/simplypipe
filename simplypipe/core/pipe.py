@@ -17,22 +17,22 @@ class Pipe:
         self._source = source
         self._ops: list[_Op] = _ops if _ops is not None else []
 
-    def _add_op(self, op: _Op) -> "Pipe":
+    def _add_op(self, op: _Op) -> Pipe:
         return Pipe(self._source, self._ops + [op])
 
-    def map(self, fn: Callable) -> "Pipe":
+    def map(self, fn: Callable) -> Pipe:
         def op(iterable: Iterable, _stats: RunStats):
             for item in iterable:
                 yield fn(item)
         return self._add_op(op)
 
-    def flat_map(self, fn: Callable) -> "Pipe":
+    def flat_map(self, fn: Callable) -> Pipe:
         def op(iterable: Iterable, _stats: RunStats):
             for item in iterable:
                 yield from fn(item)
         return self._add_op(op)
 
-    def filter(self, fn: Callable) -> "Pipe":
+    def filter(self, fn: Callable) -> Pipe:
         def op(iterable: Iterable, stats: RunStats):
             for item in iterable:
                 if fn(item):
@@ -41,14 +41,14 @@ class Pipe:
                     stats.dropped += 1
         return self._add_op(op)
 
-    def tap(self, fn: Callable) -> "Pipe":
+    def tap(self, fn: Callable) -> Pipe:
         def op(iterable: Iterable, _stats: RunStats):
             for item in iterable:
                 fn(item)
                 yield item
         return self._add_op(op)
 
-    def batch(self, size: int) -> "Pipe":
+    def batch(self, size: int) -> Pipe:
         def op(iterable: Iterable, stats: RunStats):
             buffer: list = []
             for item in iterable:
@@ -62,7 +62,7 @@ class Pipe:
                 yield buffer
         return self._add_op(op)
 
-    def rate_limit(self, rate: float, per: float = 1.0) -> "Pipe":
+    def rate_limit(self, rate: float, per: float = 1.0) -> Pipe:
         """Emit at most `rate` items per `per` seconds."""
         min_interval = per / rate
 
@@ -77,7 +77,7 @@ class Pipe:
                 yield item
         return self._add_op(op)
 
-    def dedupe(self, key: Callable | None = None, max_size: int | None = None) -> "Pipe":
+    def dedupe(self, key: Callable | None = None, max_size: int | None = None) -> Pipe:
         """Drop duplicate items. key extracts the comparison value.
         max_size bounds memory by evicting the oldest seen key (LRU)."""
 
@@ -100,7 +100,7 @@ class Pipe:
         retries: int = 3,
         backoff: float = 1.0,
         exceptions: tuple = (Exception,),
-    ) -> "Pipe":
+    ) -> Pipe:
         """Apply fn with up to `retries` retries on failure.
         Backoff is exponential: backoff * 2 ** attempt seconds."""
 
@@ -120,7 +120,7 @@ class Pipe:
                     raise last_exc  # type: ignore[misc]
         return self._add_op(op)
 
-    def take(self, n: int) -> "Pipe":
+    def take(self, n: int) -> Pipe:
         """Emit at most `n` items then stop."""
 
         def op(iterable: Iterable, _stats: RunStats):
@@ -138,8 +138,9 @@ class Pipe:
         fn: Callable,
         on_error: Callable,
         exceptions: tuple = (Exception,),
-    ) -> "Pipe":
-        """Apply fn to each item. On exception, call on_error(item, exc) and drop the item."""
+    ) -> Pipe:
+        """Apply fn to each item. On exception, call on_error(item, exc)
+        and drop the item."""
 
         def op(iterable: Iterable, stats: RunStats):
             for item in iterable:
