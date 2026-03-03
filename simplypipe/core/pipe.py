@@ -52,7 +52,7 @@ class Pipe:
                 if buffer is None:
                     yield from executor.map(fn, iterable)
                 else:
-                    futures: deque = deque()
+                    futures: deque[Any] = deque()
                     it = iter(iterable)
                     for item in itertools.islice(it, buffer):
                         futures.append(executor.submit(fn, item))
