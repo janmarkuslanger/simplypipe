@@ -335,6 +335,16 @@ def test_parallel_map_with_explicit_workers():
     assert result == [i * 2 for i in range(10)]
 
 
+def test_parallel_map_buffer_zero_raises():
+    with pytest.raises(ValueError, match="buffer"):
+        pipe([1, 2, 3]).parallel_map(lambda x: x, buffer=0)
+
+
+def test_parallel_map_buffer_negative_raises():
+    with pytest.raises(ValueError, match="buffer"):
+        pipe([1, 2, 3]).parallel_map(lambda x: x, buffer=-1)
+
+
 def test_parallel_map_buffer_produces_correct_results():
     result = []
     pipe(range(20)).parallel_map(lambda x: x * 2, max_workers=4, buffer=5).run(

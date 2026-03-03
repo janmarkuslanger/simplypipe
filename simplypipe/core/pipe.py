@@ -44,6 +44,9 @@ class Pipe:
                 with large or infinite sources.
         """
 
+        if buffer is not None and buffer < 1:
+            raise ValueError(f"buffer must be >= 1, got {buffer}")
+
         def op(iterable: Iterable[Any], _stats: RunStats) -> Iterator[Any]:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 if buffer is None:
