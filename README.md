@@ -38,6 +38,23 @@ pipe(["hello", "world"])
 
 ---
 
+### `parallel_map(fn, max_workers=None, buffer=None)`
+
+Like `map`, but runs `fn` concurrently across a thread pool. Order is preserved. Best suited for I/O-bound work (HTTP requests, DB lookups, file operations).
+
+- **`max_workers`** — number of threads in the pool. `None` lets Python decide (`min(32, os.cpu_count() + 4)`).
+- **`buffer`** — max futures in-flight at once. `None` (default) submits all items upfront — fine for bounded sources. Set `buffer` when the source is large or infinite to avoid memory pressure.
+
+```python
+# I/O-bound enrichment with bounded memory
+pipe(read_urls())
+    .parallel_map(requests.get, max_workers=10, buffer=30)
+    .filter(lambda r: r.status_code == 200)
+    .run(sink=results.append)
+```
+
+---
+
 ### `flat_map(fn)`
 
 Applies `fn` to each item and flattens the result. Use this when `fn` returns an iterable and you want each element of that iterable to continue as a separate item.

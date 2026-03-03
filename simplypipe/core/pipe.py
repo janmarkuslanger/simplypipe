@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import itertools
 import time
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from collections.abc import Callable, Iterable, Iterator
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from simplypipe.stats.model import RunStats
@@ -24,6 +26,43 @@ class Pipe:
         def op(iterable: Iterable[Any], _stats: RunStats) -> Iterator[Any]:
             for item in iterable:
                 yield fn(item)
+
+        return self._add_op(op)
+
+    def parallel_map(
+        self,
+        fn: Callable[..., Any],
+        max_workers: int | None = None,
+        buffer: int | None = None,
+    ) -> Pipe:
+        """Apply fn to each item concurrently using a thread pool.
+        Order is preserved. Best suited for I/O-bound work.
+
+        max_workers: number of threads (default: Python decides).
+        buffer: max futures in-flight at once. None = submit all upfront
+                (fine for bounded sources). Set buffer to control memory
+                with large or infinite sources.
+        """
+
+        if buffer is not None and buffer < 1:
+            raise ValueError(f"buffer must be >= 1, got {buffer}")
+
+        def op(iterable: Iterable[Any], _stats: RunStats) -> Iterator[Any]:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                if buffer is None:
+                    yield from executor.map(fn, iterable)
+                else:
+                    futures: deque[Any] = deque()
+                    it = iter(iterable)
+                    for item in itertools.islice(it, buffer):
+                        futures.append(executor.submit(fn, item))
+                    # Slide the window forward one item at a time
+                    for item in it:
+                        yield futures.popleft().result()
+                        futures.append(executor.submit(fn, item))
+                    # Drain remaining futures
+                    while futures:
+                        yield futures.popleft().result()
 
         return self._add_op(op)
 
