@@ -331,17 +331,15 @@ def test_parallel_map_preserves_order():
 
 def test_parallel_map_with_explicit_workers():
     result = []
-    pipe(range(10)).parallel_map(lambda x: x * 2, max_workers=2).run(
-        sink=result.append
-    )
+    pipe(range(10)).parallel_map(lambda x: x * 2, max_workers=2).run(sink=result.append)
     assert result == [i * 2 for i in range(10)]
 
 
 def test_parallel_map_buffer_produces_correct_results():
     result = []
-    pipe(range(20)).parallel_map(
-        lambda x: x * 2, max_workers=4, buffer=5
-    ).run(sink=result.append)
+    pipe(range(20)).parallel_map(lambda x: x * 2, max_workers=4, buffer=5).run(
+        sink=result.append
+    )
     assert result == [i * 2 for i in range(20)]
 
 
@@ -358,27 +356,27 @@ def test_parallel_map_buffer_preserves_order():
 def test_parallel_map_buffer_of_one():
     # buffer=1 → one future at a time, still produces correct results
     result = []
-    pipe(range(5)).parallel_map(
-        lambda x: x * 3, max_workers=2, buffer=1
-    ).run(sink=result.append)
+    pipe(range(5)).parallel_map(lambda x: x * 3, max_workers=2, buffer=1).run(
+        sink=result.append
+    )
     assert result == [0, 3, 6, 9, 12]
 
 
 def test_parallel_map_buffer_smaller_than_source():
     # classic backpressure case: buffer much smaller than source
     result = []
-    pipe(range(100)).parallel_map(
-        lambda x: x + 1, max_workers=4, buffer=10
-    ).run(sink=result.append)
+    pipe(range(100)).parallel_map(lambda x: x + 1, max_workers=4, buffer=10).run(
+        sink=result.append
+    )
     assert result == list(range(1, 101))
 
 
 def test_parallel_map_buffer_larger_than_source():
     # buffer larger than source — behaves like no buffer
     result = []
-    pipe(range(5)).parallel_map(
-        lambda x: x * 2, max_workers=4, buffer=100
-    ).run(sink=result.append)
+    pipe(range(5)).parallel_map(lambda x: x * 2, max_workers=4, buffer=100).run(
+        sink=result.append
+    )
     assert result == [0, 2, 4, 6, 8]
 
 
